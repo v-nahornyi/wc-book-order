@@ -13,6 +13,8 @@
 
 defined('ABSPATH') || exit;
 
+// TODO: remove commented code
+
 /**
  * @class Main plugin class
  */
@@ -22,14 +24,16 @@ final class WcBookingOrder {
 	 *
 	 * @var WCBookingOrder
 	 */
-	private static WCBookingOrder $instance;
+	private static ?WCBookingOrder $instance = null;
 
 	/**
 	 * Retrieve main instance.
+	 *
+	 * Ensure one instance is loaded or can be loaded
 	 */
 	public static function get(): WCBookingOrder {
 		if ( is_null( self::$instance ) && ! ( self::$instance instanceof WCBookingOrder ) ) {
-			self::$instance = new WCBookingOrder();
+			self::$instance = new self();
 			self::$instance->init();
 		}
 
@@ -37,25 +41,44 @@ final class WcBookingOrder {
 	}
 
 	private function init(): void {
-		add_action( 'init', array( $this, 'add_product_ordering' ) );
+		//session_start();
+		add_action( 'init', array( $this, 'add_product_ordering_by_date' ) );
 	}
 
-	public function add_product_ordering(): void {
+	/**
+	 * Register logic and compontents
+	 */
+	public function add_product_ordering_by_date(): void {
+		/**
+		 * Product filtering
+		 */
+		add_filter( 'http_request_timeout', 'increase_timeout' );
+		function increase_timeout( $time ) {
+			// Default timeout is 5
+			return 40;
+		}
+
+		add_action('wp_ajax_nopriv_wc_book_order_by_date', 'wc_book_order_by_date' );
+		add_action('wp_ajax_wc_book_order_by_date', 'wc_book_order_by_date' );
+
+		/**
+		 * UI compontents
+		 */
 		add_shortcode(
-			'wc-booking-ordering',
-			array( $this, 'wc_booking_ordering')
+			'wc_book_date_ordering',
+			array( $this, 'wc_book_order_shortcode')
 		);
 	}
 
-	public function wc_booking_ordering( $atts ): bool|string {
-		$attributes = shortcode_atts( array(
-			'title' => false,
-			'limit' => 4,
-		), $atts );
-
+	/**
+	 * Shortcode returning product ordering logic and template
+	 *
+	 * @return bool|string
+	 */
+	public function wc_book_order_shortcode(): bool|string {
 		ob_start();
 
-		get_template_part( 'template-parts/booking-ordering', null, $attributes );
+		require_once( 'includes/templates/booking-ordering.php');
 
 		return ob_get_clean();
 	}
