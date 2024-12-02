@@ -41,7 +41,6 @@ final class WcBookingOrder {
 	}
 
 	private function init(): void {
-		//session_start();
 		add_action( 'init', array( $this, 'add_product_ordering_by_date' ) );
 	}
 
