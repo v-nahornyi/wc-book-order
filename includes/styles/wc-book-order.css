@@ -1,0 +1,55 @@
+.wc-book-order__btn {
+    display: block;
+    width: 100%;
+}
+
+.wc-bookings-booking-form .wc-bookings-booking-cost {
+    display: none !important;
+}
+
+.wc-book-loading {
+    --wc-b-blue: #0083ff;
+    margin-top: 0.75rem;
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    font-size: 1rem;
+    padding: 0.5rem;
+    display: none;
+}
+
+.wc-book-loading:after {
+    content: '';
+    width: 2.25rem;
+    height: 2.25rem;
+    border: 0.25rem solid transparent;
+    border-top-color: var(--wc-b-blue);
+    border-bottom-color: var(--wc-b-blue);
+    border-radius: 100%;
+    animation: 1.5s linear infinite spinCircle;
+}
+
+@keyframes spinCircle {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.wc-book-prod-link {
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+.wc-book-prod-link:before {
+    background-image: linear-gradient(180deg, #000 0%, rgba(0, 0, 0, 0) 40.02%, rgba(0, 0, 0, 0) 60.91%, #000 90%);
+}
+
+.wc-book-archive div:first-child {
+    display: none;
+}

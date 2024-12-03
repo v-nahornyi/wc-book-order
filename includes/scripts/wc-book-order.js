@@ -16,6 +16,9 @@ jQuery( function($) {
             const [ minDate, maxDate ] = constructDates(startDate, endDate);
 
             if ( minDate && maxDate ) {
+                const loader = $('.wc-book-loading');
+                loader.fadeIn().css('display', 'flex');
+
                 $.ajax({
                     method: 'POST',
                     dataType: 'json',
@@ -26,8 +29,9 @@ jQuery( function($) {
                         maxDate: maxDate,
                     }
                 })
-                    .done(function( data ) {
-                        console.log(data);
+                    .done(function( res ) {
+                        console.log(res);
+                        buildHtml(res, loader);
                     })
                     .fail(function( req, textStatus, errorThrown ) {
                         console.log(req, textStatus, errorThrown);
@@ -53,5 +57,17 @@ jQuery( function($) {
         end   = end.toISOString().split(':')[0] + ':00';
 
         return [start, end];
+    }
+
+    function buildHtml(res, loader) {
+        // Response double-check
+        if (res.success) {
+            // Iterate products sorted by category
+            for (const prop in res.data) {
+
+            }
+
+            if (loader) loader.fadeOut();
+        }
     }
 });

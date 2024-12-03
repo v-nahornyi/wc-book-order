@@ -73,6 +73,13 @@ final class WcBookingOrder {
 				'strategy'  => 'defer',
 			)
 		);
+
+		wp_enqueue_style(
+			'wc-book-order',
+			plugins_url( 'includes/styles/wc-book-order.css', __FILE__ ),
+			'',
+			'1.0.0'
+		);
 	}
 
 	public function wc_book_order_by_date(): void {
@@ -99,7 +106,7 @@ final class WcBookingOrder {
 				$allCats  = get_terms(
 					array(
 						'taxonomy' => 'product_cat',
-						'exclude'  => '43',
+						'exclude'  => '43', // Add-ons
 						'fields'   => 'names'
 					)
 				);
@@ -129,6 +136,7 @@ final class WcBookingOrder {
 								'image' => $product->get_image(),
 								'url'   => $product->get_permalink(),
 								'title' => $product->get_title(),
+								'price' => $product->get_price()
 							);
 
 							if ( isset( $products[ $category ] ) ) {
