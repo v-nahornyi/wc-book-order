@@ -58,7 +58,7 @@ final class WcBookingOrder {
 
 	private function increaseTimeout(): void {
 		add_filter( 'http_request_timeout', function ( $time ) {
-			return 10; // Default timeout is 5
+			return 50; // Default timeout is 5
 		} );
 	}
 
@@ -76,9 +76,12 @@ final class WcBookingOrder {
 	}
 
 	public function wc_book_order_by_date(): void {
+		$minDate = esc_sql( $_POST['minDate'] );
+		$maxDate = esc_sql( $_POST['maxDate'] );
+
 		$args = array(
-			"min_date" => "2024-12-08T00:00",
-			"max_date" => "2024-12-09T00:00",
+			"min_date" => $minDate,
+			"max_date" => $maxDate,
 			"per_page" => 9999
 		);
 
@@ -135,6 +138,10 @@ final class WcBookingOrder {
 					}
 				}
 
+				wp_send_json_success( $products, 200 );
+
+			} else {
+				wp_send_json_error( 'No products available.', 200 );
 			}
 		}
 	}
