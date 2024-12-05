@@ -64,7 +64,8 @@
     background-color: var( --e-global-color-primary );
 }
 
-.wc-book-search__btn:hover {
+.wc-book-search__btn:hover,
+.wc-book-search__btn:focus {
     background-color: transparent;
     color: var( --e-global-color-primary );
 }
