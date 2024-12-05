@@ -21,8 +21,6 @@ defined( 'ABSPATH' ) || exit;
 final class WcBookingOrder {
 	/**
 	 * Class instance
-	 *
-	 * @var WCBookingOrder
 	 */
 	private static ?WCBookingOrder $instance = null;
 
@@ -44,22 +42,15 @@ final class WcBookingOrder {
 		add_action( 'init', array( $this, 'add_product_ordering_by_date' ) );
 	}
 
-	/** Register logic and compontents */
+	/** Register logic and components */
 	public function add_product_ordering_by_date(): void {
-		$this->increaseTimeout();
 		$this->enqueue_assets();
 
 		add_action( 'wp_ajax_nopriv_wc_book_order_by_date', array( $this, 'wc_book_order_by_date' ) );
 		add_action( 'wp_ajax_wc_book_order_by_date', array( $this, 'wc_book_order_by_date' ) );
 
-		/** UI compontents */
+		/** UI components */
 		add_shortcode( 'wc_book_date_ordering', array( $this, 'wc_book_order_shortcode' ) );
-	}
-
-	private function increaseTimeout(): void {
-		add_filter( 'http_request_timeout', function ( $time ) {
-			return 50; // Default timeout is 5
-		} );
 	}
 
 	private function enqueue_assets(): void {
@@ -124,7 +115,7 @@ final class WcBookingOrder {
 							 * that all the products would have only 1 category
 							 * TODO: implement categories traversal with get_ancestors()
 							 */
-							$category = get_the_terms( $product->id, 'product_cat' )[0]->name;
+							$category = get_the_terms( $product->get_id(), 'product_cat' )[0]->name;
 
 							if ( $category === 'Add-ons' ) {
 								continue;
@@ -140,7 +131,7 @@ final class WcBookingOrder {
 							);
 
 							if ( isset( $products[ $category ] ) ) {
-								array_push( $products[ $category ], $productData );
+								$products[ $category ][] = $productData;
 							}
 						}
 					}
