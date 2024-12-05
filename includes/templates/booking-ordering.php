@@ -11,8 +11,7 @@
         <div><?php _e( 'Loading', 'wc-book-order' ); ?>...</div>
     </div>
 </div>
-
-<div class="wc-book-archive wc-book-archive-section">
+<div class="wc-book-archive wc-book-archive-section" style="display: none">
     <h2 class="wc-book-archive__title"></h2>
     <div class="jet-listing-grid__items grid-col-desk-3 grid-col-tablet-2 grid-col-mobile-1">
         <div class="jet-listing-grid__item">
@@ -25,7 +24,7 @@
                         </div>
                     </div>
 
-                    <div class="elementor-element e-con-full e-flex e-con e-child">
+                    <div class="bottom-element elementor-element e-con-full e-flex e-con e-child">
                         <div class="elementor-element elementor-widget__width-auto elementor-widget elementor-widget-woocommerce-product-price">
                             <div class="elementor-widget-container">
                                 <p class="price"><?php _e( 'From' ) ?>:
@@ -33,6 +32,11 @@
                                         <bdi><span class="currency-sym"><?php echo get_woocommerce_currency_symbol(); ?></span>400.00</bdi>
                                     </span>
                                 </p>
+                            </div>
+                        </div>
+                        <div class="elementor-elementproduct-cat-archive-card elementor-widget elementor-widget-heading" data-element_type="widget" data-widget_type="heading.default">
+                            <div class="elementor-widget-container">
+                                <p class="elementor-size-default wc-book-reserve">Reserve</p>
                             </div>
                         </div>
                     </div>

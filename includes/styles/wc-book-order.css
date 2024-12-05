@@ -3,6 +3,7 @@
     flex-direction: column;
     gap: 2.5rem;
     align-items: center;
+    margin-bottom: 1.5rem;
 }
 
 .flatpickr-current-month .flatpickr-monthDropdown-months,
@@ -56,16 +57,97 @@
     }
 }
 
+.wc-book-archive {
+    margin-bottom: 5rem;
+}
+
+.wc-book-archive .jet-listing-grid__item {
+    height: 23.75rem;
+}
+.wc-book-prod-link.e-con {
+    --padding-top: 1.5rem;
+    --padding-right: 1.5rem;
+    --padding-bottom: 1.5rem;
+    --padding-left: 1.5rem;
+}
+
 .wc-book-prod-link {
+    display: block;
+    height: 100%;
     background-position: center center;
     background-repeat: no-repeat;
     background-size: cover;
+    color: #fff;
 }
 
 .wc-book-prod-link:before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
     background-image: linear-gradient(180deg, #000 0%, rgba(0, 0, 0, 0) 40.02%, rgba(0, 0, 0, 0) 60.91%, #000 90%);
+    opacity: .5;
 }
 
-.wc-book-archive div:first-child {
-    display: none;
+.wc-book-archive__title {
+    margin: 0 0 2rem;
+}
+
+.wc-book-prod-link .bottom-element {
+    --flex-direction: row;
+    margin-top: auto;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.wc-book-prod-link .elementor-widget-heading .elementor-heading-title {
+    color: #fff;
+}
+
+.wc-book-prod-link .price {
+    margin-bottom: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #fff;
+}
+
+.wc-book-reserve {
+    opacity: 0;
+    margin: 0;
+    padding: 0.9375rem 1.875rem;
+    border-radius: 1.25rem;
+    background-color: var( --e-global-color-primary );
+    transition: background .3s, opacity .3s;
+    font-size: 1rem;
+    line-height: 1rem;
+    color: #fff;
+}
+
+.wc-book-reserve:hover {
+    background-color: var( --e-global-color-secondary )
+}
+
+.wc-book-prod-link:hover .wc-book-reserve {
+    opacity: 1;
+}
+
+@media (max-width: 64rem) {
+    .wc-book-archive {
+        margin-bottom: 2.5rem;
+    }
+
+    .wc-book-archive__title {
+        margin-bottom: 1rem;
+    }
+
+    .wc-book-archive .jet-listing-grid__item {
+        height: 25rem;
+    }
+}
+
+@media (max-width: 47.9375rem) {
+    .wc-book-archive .jet-listing-grid__item {
+        height: 20rem;
+    }
 }

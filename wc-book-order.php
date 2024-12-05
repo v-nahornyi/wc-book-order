@@ -2,7 +2,7 @@
 /**
  *      * @wordpress-plugin
  *      * Plugin Name:       WC Bookings Product Order
- *      * Version:           1.0.1
+ *      * Version:           1.0.2
  *      * Description:       Order products by date via WC Bookings
  *      * Author:            Vladyslav Nahornyi
  *      * Author URI:        https://github.com/b851TYiytNCk
@@ -42,7 +42,6 @@ final class WcBookingOrder {
 
 	/** Register logic and components */
 	public function add_product_ordering_by_date(): void {
-		$this->increaseTimeout();
 		$this->enqueue_assets();
 
 		add_action( 'wp_ajax_nopriv_wc_book_order_by_date', array( $this, 'wc_book_order_by_date' ) );
@@ -50,12 +49,6 @@ final class WcBookingOrder {
 
 		/** UI components */
 		add_shortcode( 'wc_book_date_ordering', array( $this, 'wc_book_order_shortcode' ) );
-	}
-
-	private function increaseTimeout(): void {
-		add_filter( 'http_request_timeout', function ( $time ) {
-			return 50; // Default timeout is 5
-		} );
 	}
 
 	private function enqueue_assets(): void {
@@ -153,7 +146,7 @@ final class WcBookingOrder {
 							 * Product data to insert in HTML
 							 */
 							$productData = array(
-								'image' => wp_get_attachment_image_url( $product->get_image_id() ),
+								'image' => wp_get_attachment_image_url( $product->get_image_id(), 'woocommerce_thumbnail' ),
 								'url'   => $product->get_permalink(),
 								'title' => $product->get_title(),
 								'price' => $product->get_price()

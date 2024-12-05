@@ -70,18 +70,22 @@ jQuery( function($) {
      */
     function buildHtml(res) {
         const section = $('.wc-book-archive');
-        // Response double-check
+        /** Response double-check */
         if (res.success) {
-            // Iterate products sorted by category
+            /** Iterate products sorted by category */
             for (const prop in res.data) {
+                /** Setup new section with products */
                 const block = section.clone();
-                block.find('.wc-book-archive__title').text(prop);
+                block
+                    .css('display', 'block')
+                    .find('.wc-book-archive__title').text(prop);
 
                 const grid = block.find('.jet-listing-grid__items');
                 const item = grid.find('.jet-listing-grid__item');
                 const products = res.data[prop];
 
                 if (Array.isArray(products) && products.length) {
+                    /** Fill products in section */
                     products.forEach( (e, i) => {
                         const prodItem = i < 1 ? item : item.clone();
                         /** Set image and product link */
