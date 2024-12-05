@@ -13,8 +13,6 @@
 
 defined( 'ABSPATH' ) || exit;
 
-// TODO: remove commented code
-
 /**
  * @class Main plugin class
  */

@@ -36,6 +36,9 @@ jQuery( function($) {
                     .fail(function( req, textStatus, errorThrown ) {
                         console.log(req, textStatus, errorThrown);
                     })
+                    .always(function(){
+                        loader.fadeOut();
+                    })
             } else {
                 console.error('Invalid dates are specified.');
             }
@@ -59,15 +62,13 @@ jQuery( function($) {
         return [start, end];
     }
 
-    function buildHtml(res, loader) {
+    function buildHtml(res) {
         // Response double-check
         if (res.success) {
             // Iterate products sorted by category
             for (const prop in res.data) {
 
             }
-
-            if (loader) loader.fadeOut();
         }
     }
 });
