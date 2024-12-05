@@ -2,7 +2,7 @@
 /**
  *      * @wordpress-plugin
  *      * Plugin Name:       WC Bookings Product Order
- *      * Version:           1.0.0
+ *      * Version:           1.0.1
  *      * Description:       Order products by date via WC Bookings
  *      * Author:            Vladyslav Nahornyi
  *      * Author URI:        https://github.com/b851TYiytNCk
