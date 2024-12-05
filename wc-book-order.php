@@ -91,8 +91,9 @@ final class WcBookingOrder {
 			$slots = json_decode( $response['body'] )->records;
 
 			if ( is_array( $slots ) && ! empty( $slots ) ) {
-				$products = array();
-				$allCats  = get_terms(
+				$products   = array();
+				$productIds = array();
+				$allCats    = get_terms(
 					array(
 						'taxonomy' => 'product_cat',
 						'exclude'  => '43', // Add-ons
@@ -105,7 +106,8 @@ final class WcBookingOrder {
 				}
 
 				foreach ( $slots as $slot ) {
-					if ( $slot->available ) {
+					if ( $slot->available && ! in_array( $slot->product_id, $productIds, true ) ) {
+						$productIds[] = $slot->product_id;
 						$product = wc_get_product( $slot->product_id ); // Object || False
 						if ( $product ) {
 							/**
