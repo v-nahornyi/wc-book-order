@@ -6,25 +6,6 @@
     margin-bottom: 1.5rem;
 }
 
-.flatpickr-current-month .flatpickr-monthDropdown-months,
-.flatpickr-current-month input.cur-year {
-    padding: 0 0 0 .5ch !important;
-    display: inline-block !important;
-}
-
-#wc-book-datepicker {
-    width: 100%;
-    max-width: 22rem;
-    border-radius: .4rem;
-    padding: 0.6rem 1rem !important;
-}
-
-.wc-book-search__btn {
-    display: block;
-    width: 100%;
-    max-width: 8rem;
-}
-
 .wc-book-loading {
     --wc-b-blue: #0083ff;
     margin-top: 0.75rem;
@@ -55,6 +36,36 @@
     100% {
         transform: rotate(360deg);
     }
+}
+
+.flatpickr-current-month .flatpickr-monthDropdown-months,
+.flatpickr-current-month input.cur-year {
+    padding: 0 0 0 .5ch !important;
+    display: inline-block !important;
+}
+
+#wc-book-datepicker {
+    width: 100%;
+    max-width: 22rem;
+    border-radius: .4rem;
+    padding: 0.8rem 1.2rem !important;
+    border-color: var(--e-global-color-primary);
+    color: var(--e-global-color-primary);
+    font-weight: 600;
+}
+
+.wc-book-search__btn {
+    display: block;
+    width: 100%;
+    max-width: 8rem;
+    color: var( --e-global-color-secondary );
+    border-color: var( --e-global-color-primary );
+    background-color: var( --e-global-color-primary );
+}
+
+.wc-book-search__btn:hover {
+    background-color: transparent;
+    color: var( --e-global-color-primary );
 }
 
 .wc-book-archive {
@@ -121,6 +132,8 @@
     transition: background .3s, opacity .3s;
     font-size: 1rem;
     line-height: 1rem;
+    font-family: Roboto, sans-serif;
+    font-weight: 600;
     color: #fff;
 }
 
