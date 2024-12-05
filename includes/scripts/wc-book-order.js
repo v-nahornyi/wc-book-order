@@ -106,6 +106,8 @@ jQuery( function($) {
                     block.insertAfter(section);
                 }
             }
+            /** Clear DOM */
+            section.remove();
         } else {
             console.error('Invalid response');
         }
