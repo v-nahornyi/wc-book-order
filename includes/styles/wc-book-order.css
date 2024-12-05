@@ -1,16 +1,32 @@
-.wc-book-order__btn {
-    display: block;
-    width: 100%;
+.wc-book-order {
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+    align-items: center;
 }
 
-.wc-bookings-booking-form .wc-bookings-booking-cost {
-    display: none !important;
+.flatpickr-current-month .flatpickr-monthDropdown-months,
+.flatpickr-current-month input.cur-year {
+    padding: 0 0 0 .5ch !important;
+    display: inline-block !important;
+}
+
+#wc-book-datepicker {
+    width: 100%;
+    max-width: 22rem;
+    border-radius: .4rem;
+    padding: 0.6rem 1rem !important;
+}
+
+.wc-book-search__btn {
+    display: block;
+    width: 100%;
+    max-width: 8rem;
 }
 
 .wc-book-loading {
     --wc-b-blue: #0083ff;
     margin-top: 0.75rem;
-    display: flex;
     gap: 0.5rem;
     align-items: center;
     justify-content: center;

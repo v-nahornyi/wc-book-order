@@ -42,6 +42,7 @@ final class WcBookingOrder {
 
 	/** Register logic and components */
 	public function add_product_ordering_by_date(): void {
+		$this->increaseTimeout();
 		$this->enqueue_assets();
 
 		add_action( 'wp_ajax_nopriv_wc_book_order_by_date', array( $this, 'wc_book_order_by_date' ) );
@@ -51,24 +52,50 @@ final class WcBookingOrder {
 		add_shortcode( 'wc_book_date_ordering', array( $this, 'wc_book_order_shortcode' ) );
 	}
 
-	private function enqueue_assets(): void {
-		wp_enqueue_script(
-			'wc-book-order',
-			plugins_url( 'includes/scripts/wc-book-order.js', __FILE__ ),
-			array( 'jquery' ),
-			'1.0.0',
-			array(
-				'in_footer' => true,
-				'strategy'  => 'defer',
-			)
-		);
+	private function increaseTimeout(): void {
+		add_filter( 'http_request_timeout', function ( $time ) {
+			return 50; // Default timeout is 5
+		} );
+	}
 
-		wp_enqueue_style(
-			'wc-book-order',
-			plugins_url( 'includes/styles/wc-book-order.css', __FILE__ ),
-			'',
-			'1.0.0'
-		);
+	private function enqueue_assets(): void {
+		add_action( 'wp_enqueue_scripts', function() {
+			wp_enqueue_script(
+				'flatpickr',
+				plugins_url( 'includes/third-party/scripts/flatpickr.js', __FILE__ ),
+				array( 'jquery' ),
+				'',
+				array(
+					'in_footer' => true,
+					'strategy'  => 'defer',
+				)
+			);
+
+			wp_enqueue_script(
+				'wc-book-order',
+				plugins_url( 'includes/scripts/wc-book-order.js', __FILE__ ),
+				array( 'jquery' ),
+				'1.0.0',
+				array(
+					'in_footer' => true,
+					'strategy'  => 'defer',
+				)
+			);
+
+			wp_enqueue_style(
+				'flatpickr',
+				plugins_url( 'includes/third-party/styles/flatpickr.min.css', __FILE__ ),
+				'',
+				'',
+			);
+
+			wp_enqueue_style(
+				'wc-book-order',
+				plugins_url( 'includes/styles/wc-book-order.css', __FILE__ ),
+				'',
+				'1.0.0'
+			);
+		} );
 	}
 
 	public function wc_book_order_by_date(): void {
@@ -101,6 +128,8 @@ final class WcBookingOrder {
 					)
 				);
 
+				unset( $allCats[ array_search( 'Uncategorized', $allCats ) ] );
+
 				foreach ( $allCats as $cat ) {
 					$products[ $cat ] = array();
 				}
@@ -117,14 +146,14 @@ final class WcBookingOrder {
 							 */
 							$category = get_the_terms( $product->get_id(), 'product_cat' )[0]->name;
 
-							if ( $category === 'Add-ons' ) {
+							if ( $category === 'Add-ons' || $category === 'Uncategorized' ) {
 								continue;
 							}
 							/**
 							 * Product data to insert in HTML
 							 */
 							$productData = array(
-								'image' => $product->get_image(),
+								'image' => wp_get_attachment_image_url( $product->get_image_id() ),
 								'url'   => $product->get_permalink(),
 								'title' => $product->get_title(),
 								'price' => $product->get_price()

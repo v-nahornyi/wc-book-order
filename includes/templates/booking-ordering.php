@@ -1,24 +1,27 @@
-<style>
-.wc-bookings-booking-form-button.single_add_to_cart_button {
-    display: none !important;
-}
-</style>
 <div class="wc-book-order">
-    <button class="wc-book-order__btn">Search</button>
+    <input type="text"
+           id="wc-book-datepicker"
+           class="wc-book-datepicker"
+           placeholder="<? _e( 'Select booking date', 'wc-book-order' ); ?>"
+    ></input>
+
+    <button class="wc-book-search__btn">Search</button>
+
+    <div class="wc-book-loading">
+        <div><?php _e( 'Loading', 'wc-book-order' ); ?>...</div>
+    </div>
 </div>
 
-<div class="wc-book-loading">
-    <div><?php _e( 'Loading', 'wc-book-order' ); ?>...</div>
-</div>
-
-<div class="wc-book-archive">
+<div class="wc-book-archive wc-book-archive-section">
+    <h2 class="wc-book-archive__title"></h2>
     <div class="jet-listing-grid__items grid-col-desk-3 grid-col-tablet-2 grid-col-mobile-1">
         <div class="jet-listing-grid__item">
             <a href="" class="wc-book-prod-link elementor-element e-flex e-con-boxed e-con e-parent">
                 <div class="e-con-inner">
                     <div class="elementor-element elementor-widget elementor-widget-heading">
                         <div class="elementor-widget-container">
-                            <h4 class="elementor-heading-title elementor-size-default">Rampage 19′ Dual Lane Waterslide</h4>
+                            <h4 class="elementor-heading-title elementor-size-default">Rampage 19′ Dual Lane
+                                Waterslide</h4>
                         </div>
                     </div>
 

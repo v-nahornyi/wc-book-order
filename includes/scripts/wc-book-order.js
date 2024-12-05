@@ -1,23 +1,27 @@
 jQuery( function($) {
-    $('.wc-book-order__btn').on( 'click', requestSlots );
+
+    /** Datepicker */
+    const dateInput = $('#wc-book-datepicker');
+    dateInput.flatpickr({
+        dateFormat: "Y-m-d H:i",
+    });
+
+    /** REST API request **/
+    $('.wc-book-search__btn').on( 'click', requestSlots );
 
     function requestSlots() {
-        const startYear  = + $('[name=wc_bookings_field_start_date_year]').val();
-        const startMonth = + $('[name=wc_bookings_field_start_date_month]').val();
-        const startDay   = + $('[name=wc_bookings_field_start_date_day]').val();
+        let targetDate = dateInput.val();
 
-        const endYear  = + $('[name=wc_bookings_field_start_date_to_year]').val();
-        const endMonth = + $('[name=wc_bookings_field_start_date_to_month]').val();
-        const endDay   = + $('[name=wc_bookings_field_start_date_to_day]').val();
+        if ( targetDate.length === 16 ) {
+            targetDate = new Date( targetDate );
 
-        if ( startMonth && startDay && startYear && endMonth && endDay && endYear ) {
-            const startDate = new Date( Date.UTC(startYear, startMonth - 1, startDay) );
-            const endDate   = new Date( Date.UTC(endYear, endMonth - 1, endDay) );
-            const [ minDate, maxDate ] = constructDates(startDate, endDate);
+            const [ minDate, maxDate ] = constructDates(targetDate);
 
             if ( minDate && maxDate ) {
                 const loader = $('.wc-book-loading');
                 loader.fadeIn().css('display', 'flex');
+
+
 
                 $.ajax({
                     method: 'POST',
@@ -30,8 +34,7 @@ jQuery( function($) {
                     }
                 })
                     .done(function( res ) {
-                        console.log(res);
-                        buildHtml(res, loader);
+                        buildHtml(res);
                     })
                     .fail(function( req, textStatus, errorThrown ) {
                         console.log(req, textStatus, errorThrown);
@@ -47,14 +50,13 @@ jQuery( function($) {
         }
     }
 
-    function constructDates(start, end) {
-        if ( isNaN( start.getTime() ) || isNaN( end.getTime() ) ) {
+    function constructDates(start) {
+        if ( isNaN( start.getTime() ) ) {
             return [false, false];
         }
 
-        if (start === end) {
-            end.setDate(end.getDate() + 1);
-        }
+        let end = new Date(start);
+        end.setDate(end.getDate() + 1);
 
         start = start.toISOString().split(':')[0] + ':00';
         end   = end.toISOString().split(':')[0] + ':00';
@@ -62,13 +64,46 @@ jQuery( function($) {
         return [start, end];
     }
 
+    /**
+     * Builds product archive based on data passed to the function
+     * @param res
+     */
     function buildHtml(res) {
+        const section = $('.wc-book-archive');
         // Response double-check
         if (res.success) {
             // Iterate products sorted by category
             for (const prop in res.data) {
+                const block = section.clone();
+                block.find('.wc-book-archive__title').text(prop);
 
+                const grid = block.find('.jet-listing-grid__items');
+                const item = grid.find('.jet-listing-grid__item');
+                const products = res.data[prop];
+
+                if (Array.isArray(products) && products.length) {
+                    products.forEach( (e, i) => {
+                        const prodItem = i < 1 ? item : item.clone();
+                        /** Set image and product link */
+                        prodItem.find('.wc-book-prod-link')
+                            .css('background-image', `url(${e.image})`)
+                            .attr('href', e.url);
+                        /** Set Title */
+                        prodItem.find('.elementor-heading-title').text(e.title);
+                        /** Set Price */
+                        const currency = prodItem.find('.currency-sym');
+                        currency.parent().html(currency[0].outerHTML + e.price);
+
+                        if (i) {
+                            prodItem.appendTo(grid);
+                        }
+                    });
+
+                    block.insertAfter(section);
+                }
             }
+        } else {
+            console.error('Invalid response');
         }
     }
 });
