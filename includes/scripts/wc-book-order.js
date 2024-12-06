@@ -58,8 +58,14 @@ jQuery( function($) {
         let end = new Date(start);
         end.setDate(end.getDate() + 1);
 
-        start = start.toISOString().split(':')[0] + ':00';
-        end   = end.toISOString().split(':')[0] + ':00';
+        const startDate = (start.getDate()).toString().padStart(2, '0');
+        const startMonth = (start.getMonth() + 1).toString().padStart(2, '0');
+
+        const endMonth = (end.getMonth() + 1).toString().padStart(2, '0');
+        const endDate = (end.getDate()).toString().padStart(2, '0');
+
+        start = `${start.getFullYear()}-${startMonth}-${startDate}T00:00`;
+        end   = `${end.getFullYear()}-${endMonth}-${endDate}T00:00`;
 
         return [start, end];
     }
