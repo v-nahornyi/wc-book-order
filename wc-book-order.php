@@ -147,7 +147,7 @@ final class WcBookingOrder {
 							 */
 							$productData = array(
 								'image' => wp_get_attachment_image_url( $product->get_image_id(), 'woocommerce_thumbnail' ),
-								'url'   => $product->get_permalink(),
+								'url'   => $product->get_permalink() . "?minDate={$minDate}",
 								'title' => $product->get_title(),
 								'price' => $product->get_price()
 							);
