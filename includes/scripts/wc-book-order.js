@@ -74,7 +74,19 @@ jQuery( function($) {
      * Builds product archive based on data passed to the function
      * @param res
      */
+    let notFirstTime;
     function buildHtml(res) {
+        /** Clear last search results */
+        if (notFirstTime) {
+            document.querySelectorAll('.wc-book-archive').forEach( (e, i) => {
+                if (i) {
+                    e.remove()
+                } else {
+                    e.style.display = none;
+                }
+            })
+        }
+
         const section = $('.wc-book-archive');
         /** Response double-check */
         if (res.success) {
@@ -114,6 +126,8 @@ jQuery( function($) {
             }
             /** Clear DOM */
             section.remove();
+            /** Set flag after initial search */
+            notFirstTime = true;
         } else {
             console.error('Invalid response');
         }
