@@ -1,3 +1,7 @@
+.wc-book-template-archive {
+    display: none;
+}
+
 .wc-book-order {
     display: flex;
     flex-direction: column;

@@ -11,7 +11,7 @@
         <div><?php _e( 'Loading', 'wc-book-order' ); ?>...</div>
     </div>
 </div>
-<div class="wc-book-archive wc-book-archive-section" style="display: none">
+<div class="wc-book-archive wc-book-template-archive wc-book-archive-section">
     <h2 class="wc-book-archive__title"></h2>
     <div class="jet-listing-grid__items grid-col-desk-3 grid-col-tablet-2 grid-col-mobile-1">
         <div class="jet-listing-grid__item">

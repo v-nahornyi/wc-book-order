@@ -78,16 +78,10 @@ jQuery( function($) {
     function buildHtml(res) {
         /** Clear last search results */
         if (notFirstTime) {
-            document.querySelectorAll('.wc-book-archive').forEach( (e, i) => {
-                if (i) {
-                    e.remove()
-                } else {
-                    e.style.display = none;
-                }
-            })
+            $('.wc-book-archive:not(.wc-book-template-archive )').remove()
         }
 
-        const section = $('.wc-book-archive');
+        const section = $('.wc-book-template-archive');
         /** Response double-check */
         if (res.success) {
             /** Iterate products sorted by category */
@@ -95,7 +89,7 @@ jQuery( function($) {
                 /** Setup new section with products */
                 const block = section.clone();
                 block
-                    .css('display', 'block')
+                    .removeClass('wc-book-template-archive')
                     .find('.wc-book-archive__title').text(prop);
 
                 const grid = block.find('.jet-listing-grid__items');
@@ -124,9 +118,7 @@ jQuery( function($) {
                     block.insertAfter(section);
                 }
             }
-            /** Clear DOM */
-            section.remove();
-            /** Set flag after initial search */
+            /** Set flag after initial search to clear DOM */
             notFirstTime = true;
         } else {
             console.error('Invalid response');
