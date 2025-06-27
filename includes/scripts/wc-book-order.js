@@ -3,7 +3,7 @@ jQuery( function($) {
     /** Datepicker */
     const dateInput = $('#wc-book-datepicker');
     dateInput.flatpickr({
-        dateFormat: "Y-m-d H:i",
+        dateFormat: "Y-m-d",
     });
 
     /** REST API request **/
@@ -12,7 +12,7 @@ jQuery( function($) {
     function requestSlots() {
         let targetDate = dateInput.val();
 
-        if ( targetDate.length === 16 ) {
+        if ( targetDate.length === 10 ) {
             targetDate = new Date( targetDate );
 
             const [ minDate, maxDate ] = constructDates(targetDate);
@@ -70,11 +70,13 @@ jQuery( function($) {
         return [start, end];
     }
 
+
+    let notFirstTime;
+
     /**
      * Builds product archive based on data passed to the function
      * @param res
      */
-    let notFirstTime;
     function buildHtml(res) {
         /** Clear last search results */
         if (notFirstTime) {
@@ -86,6 +88,7 @@ jQuery( function($) {
         if (res.success) {
             /** Iterate products sorted by category */
             for (const prop in res.data) {
+                console.log(prop);
                 /** Setup new section with products */
                 const block = section.clone();
                 block
@@ -115,7 +118,7 @@ jQuery( function($) {
                         }
                     });
 
-                    block.insertAfter(section);
+                    block.appendTo(section.parent());
                 }
             }
             /** Set flag after initial search to clear DOM */

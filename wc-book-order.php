@@ -22,6 +22,13 @@ final class WcBookingOrder {
 	 */
 	private static ?WCBookingOrder $instance = null;
 
+	private static array $product_category_dictionary = [
+		'Waterslides'     => 10,
+		'Combos'          => 9,
+		'Bounce Houses'   => 8,
+		'Obstacle Course' => 7
+	];
+
 	/**
 	 * Retrieve main instance.
 	 *
@@ -52,7 +59,7 @@ final class WcBookingOrder {
 	}
 
 	private function enqueue_assets(): void {
-		add_action( 'wp_enqueue_scripts', function() {
+		add_action( 'wp_enqueue_scripts', function () {
 			wp_enqueue_script(
 				'flatpickr',
 				plugins_url( 'includes/third-party/scripts/flatpickr.js', __FILE__ ),
@@ -68,7 +75,7 @@ final class WcBookingOrder {
 				'wc-book-order',
 				plugins_url( 'includes/scripts/wc-book-order.js', __FILE__ ),
 				array( 'jquery' ),
-				'1.0.0',
+				'1.0.1',
 				array(
 					'in_footer' => true,
 					'strategy'  => 'defer',
@@ -113,27 +120,15 @@ final class WcBookingOrder {
 			if ( is_array( $slots ) && ! empty( $slots ) ) {
 				$products   = array();
 				$productIds = array();
-				$allCats    = get_terms(
-					array(
-						'taxonomy' => 'product_cat',
-						'exclude'  => '43', // Add-ons
-						'fields'   => 'names'
-					)
-				);
-
-				unset( $allCats[ array_search( 'Uncategorized', $allCats ) ] );
-
-				foreach ( $allCats as $cat ) {
-					$products[ $cat ] = array();
-				}
 
 				foreach ( $slots as $slot ) {
 					if ( $slot->available && ! in_array( $slot->product_id, $productIds, true ) ) {
 						$productIds[] = $slot->product_id;
-						$product = wc_get_product( $slot->product_id ); // Object || False
+						$product      = wc_get_product( $slot->product_id ); // Object || False
 						if ( $product ) {
 							/**
-							 * Here must be correct traversal but it is not implemented as it is known
+							 * Here must be correct traversal
+							 * it is not implemented here because it is known
 							 * that all the products would have only 1 category
 							 * TODO: implement categories traversal with get_ancestors()
 							 */
@@ -152,12 +147,16 @@ final class WcBookingOrder {
 								'price' => $product->get_price()
 							);
 
-							if ( isset( $products[ $category ] ) ) {
-								$products[ $category ][] = $productData;
+							if ( ! isset( $products[ $category ] ) ) {
+								$products[ $category ] = array();
 							}
+
+							$products[ $category ][] = $productData;
 						}
 					}
 				}
+
+				uksort( $products, [ $this, 'sort_categories' ] );
 
 				wp_send_json_success( $products, 200 );
 
@@ -165,6 +164,10 @@ final class WcBookingOrder {
 				wp_send_json_error( 'No products available.', 200 );
 			}
 		}
+	}
+
+	private function sort_categories( $a, $b ) {
+		return self::$product_category_dictionary[ $b ] - self::$product_category_dictionary[ $a ];
 	}
 
 	/**
