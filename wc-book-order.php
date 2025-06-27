@@ -98,6 +98,9 @@ final class WcBookingOrder {
 		} );
 	}
 
+	/**
+	 * @throws Exception
+	 */
 	public function wc_book_order_by_date(): void {
 		$minDate = esc_sql( $_POST['minDate'] );
 		$maxDate = esc_sql( $_POST['maxDate'] );
@@ -121,10 +124,12 @@ final class WcBookingOrder {
 				$products   = array();
 				$productIds = array();
 
+				date_default_timezone_set('America/New_York');
+
 				foreach ( $slots as $slot ) {
 					if ( $slot->available && ! in_array( $slot->product_id, $productIds, true ) ) {
 						$productIds[] = $slot->product_id;
-						$product      = wc_get_product( $slot->product_id ); // Object || False
+						$product = get_wc_product_booking( $slot->product_id );
 						if ( $product ) {
 							/**
 							 * Here must be correct traversal
@@ -132,11 +137,59 @@ final class WcBookingOrder {
 							 * that all the products would have only 1 category
 							 * TODO: implement categories traversal with get_ancestors()
 							 */
-							$category = get_the_terms( $product->get_id(), 'product_cat' )[0]->name;
+							$category = get_the_terms( $slot->product_id, 'product_cat' )[0]->name;
 
 							if ( $category === 'Add-ons' || $category === 'Uncategorized' ) {
 								continue;
 							}
+
+							$buffer = $product->get_buffer_period();
+
+							if ( $buffer > 0 ) {
+								$minDateObj = new \DateTime( $minDate );
+								$minDateObj->setDate(
+									$minDateObj->format( 'Y' ),
+									$minDateObj->format( 'm' ),
+									(int) $minDateObj->format( 'd' ) - $buffer
+								);
+
+								$currentMinDate = $minDateObj->format('Y-m-d');
+
+								$maxDateObj = new \DateTime( $minDate );
+								$maxDateObj->setDate(
+									$maxDateObj->format( 'Y' ),
+									$maxDateObj->format( 'm' ),
+									(int) $maxDateObj->format( 'd' ) + $buffer + 1
+								);
+
+								$currentMaxDateConstraint = $maxDateObj->format('Y-m-d');
+
+								$currentArgs = array(
+									"min_date" => $currentMinDate,
+									"max_date" => $currentMaxDateConstraint,
+									"per_page" => 9999,
+									'product_ids' => $slot->product_id,
+								);
+
+								$currentQuery    = http_build_query( $currentArgs );
+								$currentUrl      = get_site_url() . "/wp-json/wc-bookings/v1/products/slots?" . $currentQuery;
+								$currentResponse = wp_remote_get( $currentUrl );
+								$currentSlots = json_decode( $currentResponse['body'] )->records;
+
+								$not_available = false;
+
+								foreach ( $currentSlots as $slot ) {
+									if ( $slot->available < 1 ) {
+										$not_available = true;
+										break;
+									}
+								}
+
+								if ( $not_available ) {
+									continue;
+								}
+							}
+
 							/**
 							 * Product data to insert in HTML
 							 */
