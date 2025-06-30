@@ -56,6 +56,7 @@ final class WcBookingOrder {
 
 		/** UI components */
 		add_shortcode( 'wc_book_date_ordering', array( $this, 'wc_book_order_shortcode' ) );
+		add_shortcode( 'wc_promo_slider', array( $this, 'wc_promo_slider_shortcode' ) );
 	}
 
 	private function enqueue_assets(): void {
@@ -101,9 +102,16 @@ final class WcBookingOrder {
 	/**
 	 * @throws Exception
 	 */
-	public function wc_book_order_by_date(): void {
-		$minDate = esc_sql( $_POST['minDate'] );
-		$maxDate = esc_sql( $_POST['maxDate'] );
+	public function wc_book_order_by_date( $minDate = null, $maxDate = null, $return = false ): array|bool {
+		$minDate = $minDate ?? esc_sql( $_POST['minDate'] );
+		$maxDate = $maxDate ?? esc_sql( $_POST['maxDate'] );
+
+		if ( false !== $last_results = get_transient( "wc_book_order_by_date-$minDate-$maxDate" ) ) {
+			if ( $return ) {
+				return $last_results;
+			}
+			wp_send_json_success( $last_results, 200 );
+		}
 
 		$args = array(
 			"min_date" => $minDate,
@@ -116,6 +124,9 @@ final class WcBookingOrder {
 		$response = wp_remote_get( $url );
 
 		if ( is_wp_error( $response ) ) {
+			if ( $return ) {
+				return $response->get_error_message();
+			}
 			wp_send_json_error( $response );
 		} else {
 			$slots = json_decode( $response['body'] )->records;
@@ -124,12 +135,12 @@ final class WcBookingOrder {
 				$products   = array();
 				$productIds = array();
 
-				date_default_timezone_set('America/New_York');
+				date_default_timezone_set( 'America/New_York' );
 
 				foreach ( $slots as $slot ) {
 					if ( $slot->available && ! in_array( $slot->product_id, $productIds, true ) ) {
 						$productIds[] = $slot->product_id;
-						$product = get_wc_product_booking( $slot->product_id );
+						$product      = get_wc_product_booking( $slot->product_id );
 						if ( $product ) {
 							/**
 							 * Here must be correct traversal
@@ -146,40 +157,40 @@ final class WcBookingOrder {
 							$buffer = $product->get_buffer_period();
 
 							if ( $buffer > 0 ) {
-								$minDateObj = new \DateTime( $minDate );
+								$minDateObj = new DateTime( $minDate );
 								$minDateObj->setDate(
 									$minDateObj->format( 'Y' ),
 									$minDateObj->format( 'm' ),
 									(int) $minDateObj->format( 'd' ) - $buffer
 								);
 
-								$currentMinDate = $minDateObj->format('Y-m-d');
+								$currentMinDate = $minDateObj->format( 'Y-m-d' );
 
-								$maxDateObj = new \DateTime( $minDate );
+								$maxDateObj = new DateTime( $minDate );
 								$maxDateObj->setDate(
 									$maxDateObj->format( 'Y' ),
 									$maxDateObj->format( 'm' ),
 									(int) $maxDateObj->format( 'd' ) + $buffer + 1
 								);
 
-								$currentMaxDateConstraint = $maxDateObj->format('Y-m-d');
+								$currentMaxDateConstraint = $maxDateObj->format( 'Y-m-d' );
 
 								$currentArgs = array(
-									"min_date" => $currentMinDate,
-									"max_date" => $currentMaxDateConstraint,
-									"per_page" => 9999,
+									"min_date"    => $currentMinDate,
+									"max_date"    => $currentMaxDateConstraint,
+									"per_page"    => 9999,
 									'product_ids' => $slot->product_id,
 								);
 
 								$currentQuery    = http_build_query( $currentArgs );
 								$currentUrl      = get_site_url() . "/wp-json/wc-bookings/v1/products/slots?" . $currentQuery;
 								$currentResponse = wp_remote_get( $currentUrl );
-								$currentSlots = json_decode( $currentResponse['body'] )->records;
+								$currentSlots    = json_decode( $currentResponse['body'] )->records;
 
 								$not_available = false;
 
-								foreach ( $currentSlots as $slot ) {
-									if ( $slot->available < 1 ) {
+								foreach ( $currentSlots as $currentSlot ) {
+									if ( $currentSlot->available < 1 ) {
 										$not_available = true;
 										break;
 									}
@@ -195,7 +206,7 @@ final class WcBookingOrder {
 							 */
 							$productData = array(
 								'image' => wp_get_attachment_image_url( $product->get_image_id(), 'woocommerce_thumbnail' ),
-								'url'   => $product->get_permalink() . "?minDate={$minDate}",
+								'url'   => $product->get_permalink() . "?minDate=$minDate",
 								'title' => $product->get_title(),
 								'price' => $product->get_price()
 							);
@@ -211,12 +222,23 @@ final class WcBookingOrder {
 
 				uksort( $products, [ $this, 'sort_categories' ] );
 
+				set_transient( "wc_book_order_by_date-$minDate-$maxDate", $products, DAY_IN_SECONDS );
+
+				if ( $return ) {
+					return $products;
+				}
+
 				wp_send_json_success( $products, 200 );
 
 			} else {
+				if ( $return ) {
+					return $response->get_error_message();
+				}
 				wp_send_json_error( 'No products available.', 200 );
 			}
 		}
+
+		return false;
 	}
 
 	private function sort_categories( $a, $b ) {
@@ -232,6 +254,14 @@ final class WcBookingOrder {
 		ob_start();
 
 		require_once( 'includes/templates/booking-ordering.php' );
+
+		return ob_get_clean();
+	}
+
+	public function wc_promo_slider_shortcode(): bool|string {
+		ob_start();
+
+		require_once( 'includes/templates/promo-slider.php' );
 
 		return ob_get_clean();
 	}
