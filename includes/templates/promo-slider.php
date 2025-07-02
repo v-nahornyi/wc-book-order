@@ -37,10 +37,13 @@ if ( false === $products ) {
     }
 
     .wc-promo-filter {
+        --theme-dark-blue: #1b2298;
         width: 12.5rem;
-        margin: 0 0.625rem 1rem auto;
-        color: #fff;
-        background: var(--e-global-color-primary);
+        margin: 0 auto 1rem;
+        color: var(--theme-dark-blue);
+        background: #fff;
+        border: 2px solid var(--theme-dark-blue);
+        font-weight: 600;
     }
 
     @media (max-width: 48rem) {
@@ -50,6 +53,7 @@ if ( false === $products ) {
     }
 </style>
 <select id="wc-promo-filter" class="wc-promo-filter">
+    <option value="all" class="wc-promo-filter-item"><?php _e( 'All' ) ?></option>
 	<?php foreach ( $products as $product_cat_key => $product_cat_value ) { ?>
         <option value="<?= $product_cat_key ?>" class="wc-promo-filter-item"><?= $product_cat_key ?></option>
 	<?php } ?>
@@ -98,7 +102,8 @@ if ( false === $products ) {
     const products = <?= json_encode( $products ) ?>;
     const $ = jQuery;
     $(function () {
-        let initialArrayLength = Object.values(products).flat().length;
+        let allProducts = Object.values(products).flat();
+        let initialArrayLength = allProducts.length;
         let slider = initPromoSlider(initialArrayLength);
         function initPromoSlider(length, slidesPerViewValue = false) {
             if (length < 3) {
@@ -132,7 +137,7 @@ if ( false === $products ) {
               $productGrid = $('.wc-promo-slider .swiper-wrapper');
 
         $filter.on('change', (e) => {
-            $currentCat = products[e.target.value];
+            let $currentCat = e.target.value === 'all' ? allProducts : products[e.target.value];
 
             if (Array.isArray($currentCat)) {
                 slider.destroy();

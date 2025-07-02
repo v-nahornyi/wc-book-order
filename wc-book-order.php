@@ -103,8 +103,8 @@ final class WcBookingOrder {
 	 * @throws Exception
 	 */
 	public function wc_book_order_by_date( $minDate = null, $maxDate = null, $return = false ): array|bool {
-		$minDate = $minDate ?? esc_sql( $_POST['minDate'] );
-		$maxDate = $maxDate ?? esc_sql( $_POST['maxDate'] );
+		$minDate = $minDate ?: esc_sql( $_POST['minDate'] );
+		$maxDate = $maxDate ?: esc_sql( $_POST['maxDate'] );
 
 		if ( false !== $last_results = get_transient( "wc_book_order_by_date-$minDate-$maxDate" ) ) {
 			if ( $return ) {

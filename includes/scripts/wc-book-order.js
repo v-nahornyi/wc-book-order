@@ -88,7 +88,6 @@ jQuery( function($) {
         if (res.success) {
             /** Iterate products sorted by category */
             for (const prop in res.data) {
-                console.log(prop);
                 /** Setup new section with products */
                 const block = section.clone();
                 block
