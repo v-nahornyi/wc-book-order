@@ -121,7 +121,9 @@ final class WcBookingOrder {
 
 		$query    = http_build_query( $args );
 		$url      = get_site_url() . "/wp-json/wc-bookings/v1/products/slots?" . $query;
-		$response = wp_remote_get( $url );
+		$response = wp_remote_get( $url, [
+			'timeout'  => 20,
+		] );
 
 		if ( is_wp_error( $response ) ) {
 			if ( $return ) {
@@ -136,6 +138,10 @@ final class WcBookingOrder {
 				$productIds = array();
 
 				date_default_timezone_set( 'America/New_York' );
+
+				[ $currentMinDate, $currentMaxDate ] = $this->get_min_max_dates_for_buffer_check( $minDate );
+
+				$product_ids_to_check_buffer = [];
 
 				foreach ( $slots as $slot ) {
 					if ( $slot->available && ! in_array( $slot->product_id, $productIds, true ) ) {
@@ -157,48 +163,7 @@ final class WcBookingOrder {
 							$buffer = $product->get_buffer_period();
 
 							if ( $buffer > 0 ) {
-								$minDateObj = new DateTime( $minDate );
-								$minDateObj->setDate(
-									$minDateObj->format( 'Y' ),
-									$minDateObj->format( 'm' ),
-									(int) $minDateObj->format( 'd' ) - $buffer
-								);
-
-								$currentMinDate = $minDateObj->format( 'Y-m-d' );
-
-								$maxDateObj = new DateTime( $minDate );
-								$maxDateObj->setDate(
-									$maxDateObj->format( 'Y' ),
-									$maxDateObj->format( 'm' ),
-									(int) $maxDateObj->format( 'd' ) + $buffer + 1
-								);
-
-								$currentMaxDateConstraint = $maxDateObj->format( 'Y-m-d' );
-
-								$currentArgs = array(
-									"min_date"    => $currentMinDate,
-									"max_date"    => $currentMaxDateConstraint,
-									"per_page"    => 9999,
-									'product_ids' => $slot->product_id,
-								);
-
-								$currentQuery    = http_build_query( $currentArgs );
-								$currentUrl      = get_site_url() . "/wp-json/wc-bookings/v1/products/slots?" . $currentQuery;
-								$currentResponse = wp_remote_get( $currentUrl );
-								$currentSlots    = json_decode( $currentResponse['body'] )->records;
-
-								$not_available = false;
-
-								foreach ( $currentSlots as $currentSlot ) {
-									if ( $currentSlot->available < 1 ) {
-										$not_available = true;
-										break;
-									}
-								}
-
-								if ( $not_available ) {
-									continue;
-								}
+								$product_ids_to_check_buffer[] = $slot->product_id;
 							}
 
 							/**
@@ -215,7 +180,33 @@ final class WcBookingOrder {
 								$products[ $category ] = array();
 							}
 
-							$products[ $category ][] = $productData;
+							$products[ $category ][ $slot->product_id ] = $productData;
+						}
+					}
+				}
+
+				if ( ! empty( $product_ids_to_check_buffer ) ) {
+					$currentArgs = array(
+						"min_date"    => $currentMinDate,
+						"max_date"    => $currentMaxDate,
+						"per_page"    => 9999,
+						'product_ids' => implode( ',', $product_ids_to_check_buffer ),
+					);
+
+					$currentQuery    = http_build_query( $currentArgs );
+					$currentUrl      = get_site_url() . "/wp-json/wc-bookings/v1/products/slots?" . $currentQuery;
+					$currentResponse = wp_remote_get( $currentUrl, [
+						'timeout'  => 20,
+					] );
+					$currentSlots    = json_decode( $currentResponse['body'] )->records;
+
+					foreach ( $currentSlots as $currentSlot ) {
+						if ( $currentSlot->available < 1 ) {
+							foreach ( $products as &$productCat ) {
+								if ( array_key_exists( $currentSlot->product_id, $productCat ) ) {
+									unset( $productCat[ $currentSlot->product_id ] );
+								}
+							}
 						}
 					}
 				}
@@ -239,6 +230,33 @@ final class WcBookingOrder {
 		}
 
 		return false;
+	}
+
+	/**
+	 * @param string $minDate
+	 *
+	 * @return array
+	 * @throws Exception
+	 */
+	private function get_min_max_dates_for_buffer_check( string $minDate ): array {
+		/**
+		 * It is assumed that buffer period is a constant value which equals 1
+		 */
+		$minDateObj = new DateTime( $minDate );
+		$minDateObj->setDate(
+			$minDateObj->format( 'Y' ),
+			$minDateObj->format( 'm' ),
+			(int) $minDateObj->format( 'd' ) - 1
+		);
+
+		$maxDateObj = new DateTime( $minDate );
+		$maxDateObj->setDate(
+			$maxDateObj->format( 'Y' ),
+			$maxDateObj->format( 'm' ),
+			(int) $maxDateObj->format( 'd' ) + 1 + 1
+		);
+
+		return [ $minDateObj->format( 'Y-m-d' ), $maxDateObj->format( 'Y-m-d' ) ];
 	}
 
 	private function sort_categories( $a, $b ) {

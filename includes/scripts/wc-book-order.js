@@ -84,6 +84,7 @@ jQuery( function($) {
         }
 
         const section = $('.wc-book-template-archive');
+
         /** Response double-check */
         if (res.success) {
             /** Iterate products sorted by category */
@@ -96,7 +97,7 @@ jQuery( function($) {
 
                 const grid = block.find('.jet-listing-grid__items');
                 const item = grid.find('.jet-listing-grid__item');
-                const products = res.data[prop];
+                const products = Object.values(res.data[prop]);
 
                 if (Array.isArray(products) && products.length) {
                     /** Fill products in section */
@@ -123,6 +124,7 @@ jQuery( function($) {
             /** Set flag after initial search to clear DOM */
             notFirstTime = true;
         } else {
+            console.log(res);
             console.error('Invalid response');
         }
     }
